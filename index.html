@@ -653,17 +653,29 @@
       addLoadingIndicator();
 
       try {
-        const res = await fetch("https://text.pollinations.ai/" + currentModel, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: currentModel,
-            messages: [
-              { role: "system", content: "Tu es une IA nommée ChatGPT. Réponds naturellement et poliment." },
-              { role: "user", content: message }
-            ]
-          })
-        });
+        // Construire le contexte avec l'historique du chat actuel
+const history = chats[currentChatId]?.messages?.map(msg => ({
+  role: msg.role,
+  content: msg.content
+})) || [];
+
+// Ajouter le message système et le nouveau message utilisateur
+const messages = [
+  { role: "system", content: "Tu es une IA nommée ChatGPT. Réponds naturellement et poliment." },
+  ...history,
+  { role: "user", content: message }
+];
+
+// Envoi de la requête complète à Pollinations avec tout l'historique
+const res = await fetch("https://text.pollinations.ai/" + currentModel, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: currentModel,
+    messages
+  })
+});
+        
 
         removeLoadingIndicator();
 
